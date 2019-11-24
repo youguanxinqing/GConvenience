@@ -117,10 +117,11 @@ class FromExcel(BaseExcel):
 
     def close(self):
         self.__del__()
-        gc.collect()
 
     def __del__(self):
         self._wb.close()
+        # openpyxl 不能释放占用，手动释放
+        gc.collect()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.__del__()
