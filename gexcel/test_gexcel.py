@@ -11,6 +11,7 @@ import unittest
 import openpyxl
 
 from .fromexcel import FromExcel
+from .toexcel import ToExcel
 
 
 class TestFromExcel(unittest.TestCase):
@@ -29,10 +30,7 @@ class TestFromExcel(unittest.TestCase):
     def tearDown(self):
         self.fe.close()
         if os.path.exists(self.filename):
-            try:
-                os.remove(self.filename)
-            except PermissionError:
-                pass
+            os.remove(self.filename)
 
     def test_read_point(self):
         """
@@ -72,5 +70,75 @@ class TestFromExcel(unittest.TestCase):
         self.assertEqual(expect_res, list(res))
 
 
-if __name__ == "__main__":
-    TestFromExcel.run()
+class TestToExcel(unittest.TestCase):
+    def setUp(self):
+        m = hashlib.md5("demo".encode("utf-8"))
+        self.filename = f"{m.hexdigest()}.xlsx"
+
+        self.te = ToExcel(".", self.filename)
+
+    def tearDown(self):
+        self.te.close()
+        if os.path.exists(self.filename):
+            os.remove(self.filename)
+
+    def test_locate_point(self):
+        self.te.locate_point = (1, "A", "ZTY")
+        self.te.locate_point = (10, "J", "Ying")
+        self.te.save().close()
+
+        wb = openpyxl.load_workbook(self.filename, read_only=True)
+        sheet = wb.active
+        res_a = sheet.cell(1, 1).value
+        res_b = sheet.cell(10, 10).value
+        res_c = sheet.cell(8, 19).value
+        wb.close()
+
+        self.assertEqual("ZTY", res_a)
+        self.assertEqual("Ying", res_b)
+        self.assertNotEqual("Ying", res_c)
+
+    def test_locate_line(self):
+        cur_row = self.te._row
+        self.te.locate_line = (("z", "t", "y"),)
+        self.te.save().close()
+
+        wb = openpyxl.load_workbook(self.filename, read_only=True)
+        sheet = wb.active
+        res_a = sheet.cell(cur_row, 1).value
+        res_b = sheet.cell(cur_row, 2).value
+        res_c = sheet.cell(cur_row, 3).value
+        wb.close()
+
+        self.assertEqual(("z", "t", "y"), (res_a, res_b, res_c))
+
+    def test_locate_line_row(self):
+        """
+        指定行号写入行内容
+        """
+        row = 10
+        self.te.locate_line = (row, ("z", "t", "y"))
+        self.te.save().close()
+
+        wb = openpyxl.load_workbook(self.filename, read_only=True)
+        sheet = wb.active
+        res_a = sheet.cell(row, 1).value
+        res_b = sheet.cell(row, 2).value
+        res_c = sheet.cell(row, 3).value
+        wb.close()
+
+        self.assertEqual(("z", "t", "y"), (res_a, res_b, res_c))
+
+    def test_locate_line_row_col(self):
+        row, col = 15, 10
+        self.te.locate_line = (row, col, ("z", "t", "y"))
+        self.te.save().close()
+
+        wb = openpyxl.load_workbook(self.filename, read_only=True)
+        sheet = wb.active
+        res_a = sheet.cell(row, col).value
+        res_b = sheet.cell(row, col+1).value
+        res_c = sheet.cell(row, col+2).value
+        wb.close()
+
+        self.assertEqual(("z", "t", "y"), (res_a, res_b, res_c))

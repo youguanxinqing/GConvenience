@@ -84,26 +84,6 @@ class FromExcel(BaseExcel):
         location = self._sheet.cell(row=row, column=col)
         return location.value
 
-    @classmethod
-    def _alpha_to_digit(cls, symbol):
-        """
-        转十进制编码
-        """
-        if isinstance(symbol, str) and len(symbol) == 1:
-            return cls._convert_alpha(symbol)
-        elif isinstance(symbol, int):
-            return symbol
-        else:
-            raise ValueError("err arg")
-
-    @staticmethod
-    def _convert_alpha(alpha):
-        """
-        'a' -> 1, 'A' -> 1
-        'b' -> 2, 'B' -> 2 ...
-        """
-        return ord(alpha.upper()) - ASCII_CODE_START
-
     @staticmethod
     def _check_args(filename):
         """
@@ -116,15 +96,6 @@ class FromExcel(BaseExcel):
             raise NotImplementedError(f"only support {SUPPORT_FILE_EXTEND}, currently")
 
     def close(self):
-        self.__del__()
-
-    def __del__(self):
         self._wb.close()
         # openpyxl 不能释放占用，手动释放
         gc.collect()
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.__del__()
-
-    def __enter__(self):
-        return self

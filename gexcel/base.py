@@ -5,7 +5,8 @@ GitHub: https://github.com/youguanxinqing
 EMAIL: youguanxinqing@qq.com
 """
 import os
-import openpyxl
+
+from .config import *
 
 
 class BaseExcelMetaClass(type):
@@ -30,27 +31,37 @@ class BaseExcel(metaclass=BaseExcelMetaClass):
 
         self._wb = None
 
+    @classmethod
+    def _alpha_to_digit(cls, symbol):
+        """
+        转十进制编码
+        """
+        if isinstance(symbol, str) and len(symbol) == 1:
+            return cls._convert_alpha(symbol)
+        elif isinstance(symbol, int):
+            return symbol
+        else:
+            raise ValueError("err arg")
+
+    @staticmethod
+    def _convert_alpha(alpha):
+        """
+        'a' -> 1, 'A' -> 1
+        'b' -> 2, 'B' -> 2 ...
+        """
+        return ord(alpha.upper()) - ASCII_CODE_START
+
     def close(self):
         """
         资源释放
         """
-        raise NotImplementedError
+        pass
 
-    # def __del__(self):
-    #     self._wb.close()
-    #
-    # def __exit__(self, exc_type, exc_val, exc_tb):
-    #     self.__del__()
-    #
-    # def __enter__(self):
-    #     return self
+    def __del__(self):
+        self.close()
 
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
 
-class ToExcel(BaseExcel):
-    def __init__(self, d=".", f="gtest.xlsx"):
-        super().__init__(d, f)
-        self._wb = getattr(openpyxl, self._wb_obj_name)
-
-
-if __name__ == "__main__":
-    te = ToExcel()
+    def __enter__(self):
+        return self
