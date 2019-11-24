@@ -5,5 +5,9 @@ GitHub: https://github.com/youguanxinqing
 EMAIL: youguanxinqing@qq.com
 """
 
-from fromexcel import *
-from toexcel import *
+from .fromexcel import FromExcel
+from .toexcel import ToExcel
+
+
+__all__ = ["FromExcel", "ToExcel"]
+
