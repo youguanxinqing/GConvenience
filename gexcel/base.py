@@ -30,6 +30,12 @@ class BaseExcel(metaclass=BaseExcelMetaClass):
 
         self._wb = None
 
+    def close(self):
+        """
+        资源释放
+        """
+        raise NotImplementedError
+
     # def __del__(self):
     #     self._wb.close()
     #
@@ -46,9 +52,5 @@ class ToExcel(BaseExcel):
         self._wb = getattr(openpyxl, self._wb_obj_name)
 
 
-
-
-
 if __name__ == "__main__":
     te = ToExcel()
-    fe = FromExcel()

@@ -5,6 +5,7 @@ GitHub: https://github.com/youguanxinqing
 EMAIL: youguanxinqing@qq.com
 """
 import os
+import gc
 
 import openpyxl
 
@@ -20,7 +21,11 @@ class FromExcel(BaseExcel):
         self._wb = getattr(openpyxl, self._wb_obj_name)(self._target_path, read_only=True)
         self._sheet = self._wb.active
 
-    def read_page(self, row, nums, col_start=1, end_flag: int = END_FLAG_NUN):
+    def read_page(self,
+                  row=DEFAULT_ROW_START,
+                  num=DEFAULT_NUM,
+                  col_start: int = DEFAULT_COL_START,
+                  end_flag: int = END_FLAG_NUN):
         """
         按 sheet 进行整页读取，最大支持 1000 行
         """
@@ -32,7 +37,7 @@ class FromExcel(BaseExcel):
             if count == end_flag:
                 break
 
-            line_content = self.read_line(i, nums, col_start)
+            line_content = self.read_line(i, num, col_start)
             if not any(line_content):
                 count += 1
                 continue
@@ -56,19 +61,19 @@ class FromExcel(BaseExcel):
         """
         rt = self._alpha_to_digit(rt)
         rb = self._alpha_to_digit(rb)
-        nums = rb - rt + 1
-        return [self.read_line(i, nums, rt) for i in range(lt, lb + 1)]
+        num = rb - rt + 1
+        return [self.read_line(i, num, rt) for i in range(lt, lb + 1)]
 
-    def read_line(self, row, nums, col_start=1):
+    def read_line(self, row, num, col_start=1):
         """
         row: 某行
         nums: 读取个数
         col_start: 从哪一行起
         """
-        nums = self._alpha_to_digit(nums)
+        num = self._alpha_to_digit(num)
         return [
             self.read_point(row, col)
-            for col in range(col_start, nums + 1)
+            for col in range(col_start, col_start + num)
         ]
 
     def read_point(self, row, col):
@@ -109,3 +114,16 @@ class FromExcel(BaseExcel):
 
         if os.path.splitext(filename)[-1] not in SUPPORT_FILE_EXTEND:
             raise NotImplementedError(f"only support {SUPPORT_FILE_EXTEND}, currently")
+
+    def close(self):
+        self.__del__()
+        gc.collect()
+
+    def __del__(self):
+        self._wb.close()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.__del__()
+
+    def __enter__(self):
+        return self
