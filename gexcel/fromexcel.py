@@ -19,7 +19,7 @@ class FromExcel(BaseExcel):
 
         super().__init__(d, f)
         self._wb = getattr(openpyxl, self._wb_obj_name)(self._target_path, read_only=True)
-        self._sheet = self._wb.active
+        self._sheet = self._wb.active if sheet is None else self._wb[sheet]
 
     def read_page(self,
                   row=DEFAULT_ROW_START,

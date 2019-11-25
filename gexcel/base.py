@@ -36,8 +36,10 @@ class BaseExcel(metaclass=BaseExcelMetaClass):
         """
         转十进制编码
         """
-        if isinstance(symbol, str) and len(symbol) == 1:
+        if isinstance(symbol, str) and len(symbol) == 1 and not symbol.isdigit():
             return cls._convert_alpha(symbol)
+        elif isinstance(symbol, str) and symbol.isdigit():
+            return int(symbol)
         elif isinstance(symbol, int):
             return symbol
         else:
