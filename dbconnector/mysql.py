@@ -22,6 +22,15 @@ class MysqlConnector(BaseConnector):
             return self._cursor.execute(sql, args)
         return self._cursor.execute(sql)
 
+    def fetchall(self):
+        return self._cursor.fetchall()
+
+    def fetchone(self):
+        return self._cursor.fetchone()
+
+    def fetchmany(self):
+        return self._cursor.fetchmany()
+
     def commit(self):
         self._conn.commit()
 

@@ -72,7 +72,7 @@ class ToExcel(BaseExcel):
         设置表头
         """
         if self._row == DEFAULT_ROW_START:
-            self.locate_line = desps
+            self.locate_line = (desps,)
 
     def save(self):
         self._wb.save(self._target_path)
