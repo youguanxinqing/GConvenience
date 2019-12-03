@@ -16,12 +16,14 @@ class OracleConnector(BaseConnector):
                                        self._passwd,
                                        self._server)
         self._cursor = self._conn.cursor()
-        self._cursor.execute()
 
-    def execute(self, sql, args):
+    def execute(self, sql, args=None):
         if args:
             self._cursor.execute(sql, args)
-        return self._cursor.execute()
+        return self._cursor.execute(sql)
+
+    def fetchall(self):
+        return self._cursor.fetchall()
 
     def commit(self):
         self._conn.commit()
